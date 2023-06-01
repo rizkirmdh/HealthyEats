@@ -1,4 +1,4 @@
-const { createUser, loginUser, updateUser, createPlan, updatePlan, deletePlan, classifyingImage, addConsumedCalorie } = require('./handler');
+const { createUser, loginUser, updateUser, createPlan, updatePlan, deletePlan, classifyingImage, addConsumedCalorie, readUser, readPlan } = require('./handler');
 
 const routes = [
     {
@@ -12,6 +12,11 @@ const routes = [
         handler: loginUser,
     },
     {
+        method: 'POST',
+        path: '/readUser',
+        handler: readUser,
+    },
+    {
         method: 'PUT',
         path: '/updateUser',
         handler: updateUser
@@ -22,18 +27,18 @@ const routes = [
         handler: createPlan,
     },
     {
+        method: 'POST',
+        path: '/{plan_id}',
+        handler: readPlan,
+    },
+    {
         method: 'PUT',
-        path: '/updatePlan/{plan_id}',
+        path: '/{plan_id}/updatePlan',
         handler: updatePlan,
     },
     {
-        method: 'PUT',
-        path: '/updatePlan/{plan_id}/calorie',
-        handler: addConsumedCalorie,
-    },
-    {
         method: 'DELETE',
-        path: '/deletePlan/{plan_id}',
+        path: '/{plan_id}/deletePlan',
         handler: deletePlan,
     },
     {
@@ -49,6 +54,13 @@ const routes = [
               maxBytes: 10 * 1024 * 1024,
             },
         },
+    },
+
+    // plan c route
+    {
+        method: 'PUT',
+        path: '/updatePlan/{plan_id}/calorie',
+        handler: addConsumedCalorie,
     },
 ];
 
