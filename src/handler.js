@@ -359,6 +359,8 @@ const classifyingImage = async (request, h) => {
         });
 
         const result = mlResult.data;
+
+        // insert the process code here
         
         const response = h.response({
             status: 'success',
