@@ -1,4 +1,4 @@
-const { createUser, loginUser, updateUser, createPlan, updatePlan, deletePlan, classifyingImage, addConsumedCalorie, readUser, readPlan } = require('./handler');
+const { createUser, loginUser, updateUser, createPlan, updatePlan, deletePlan, classifyingImage, addConsumedCalorie, readUser, readPlan, getHistory } = require('./handler');
 
 const routes = [
     {
@@ -40,6 +40,11 @@ const routes = [
         method: 'DELETE',
         path: '/{plan_id}/deletePlan',
         handler: deletePlan,
+    },
+    {
+        method: 'GET',
+        path: '/getHistory',
+        handler: getHistory,
     },
     {
         method: 'POST',

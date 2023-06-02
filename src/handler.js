@@ -151,7 +151,7 @@ const readUser = async (request, h) => {
         const response = h.response({
             status: 'success',
             message: 'read successful',
-            data: { user }
+            data: user
         });
         response.code(200);
         return response;
@@ -173,10 +173,6 @@ const updateUser = async (request, h) => {
         height,
         weight
     } = request.payload;
-
-    // decode userid from android frontend
-    // const decodedToken = jwt.decode(request.headers.authorization.replace('Bearer ', ''));
-    // const userId = decodedToken.user_id;
 
     const token = request.headers.authorization.replace('Bearer ', '');
     const decodedToken = jwt.verify(token, 'secret_key');
@@ -225,7 +221,6 @@ const createPlan = async (request, h) => {
         const decodedToken = jwt.verify(token, 'secret_key');
         const userId = decodedToken.userId;
 
-
         const query = 'INSERT INTO table_plan (user_id, plan_name, plan_goal, plan_activity, calories_target) VALUES (?, ?, ?, ?, ?)';
 
         await new Promise((resolve, reject) => {
@@ -256,13 +251,15 @@ const createPlan = async (request, h) => {
 
 const readPlan = async (request, h) => {
 
-    const { plan_id } = request.params;
+    const token = request.headers.authorization.replace('Bearer ', '');
+    const decodedToken = jwt.verify(token, 'secret_key');
+    const userId = decodedToken.userId;
 
     try {
-        const query = 'SELECT * FROM table_plan WHERE plan_id = ?';
+        const query = 'SELECT * FROM table_plan WHERE user_id = ?';
         
         const plan = await new Promise((resolve, reject) => {
-            connection.query(query, [plan_id], (err, rows, field) => {
+            connection.query(query, [userId], (err, rows, field) => {
                 if (err) {
                     reject(err);
                 } else {
@@ -384,9 +381,53 @@ const deletePlan = async (request, h) => {
     }
 };
 
-// for ML endpoints (also could be used to update the calories (unsure))
 
+// not tested yet
+const getHistory = async (request, h) => {
+
+    const token = request.headers.authorization.replace('Bearer ', '');
+    const decodedToken = jwt.verify(token, 'secret_key');
+    const userId = decodedToken.userId;
+
+    try {
+
+        const query = 'SELECT table_object.object_id AS id, table_object.image_url AS imageUrl, table_food.food_name as foodName, table_food.food_calories as foodCal FROM table_object INNER JOIN table_food ON table_object.food_id=table_food.food_id WHERE table_object.user_id = ?';
+
+        const listObj = await new Promise((resolve, reject) => {
+            connection.query(query, [userId], (err, rows, field) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(rows);
+                }
+            });
+        });
+
+        const response = h.response({
+            status: 'success',
+            message: 'History read successfully',
+            data: listObj,
+        });
+        response.code(200);
+        return response;
+    } catch (err) {
+        const response = h.response({
+            status: 'fail',
+            message: err.message,
+        });
+        response.code(500);
+        return response;
+    }
+};
+
+// for ML endpoints (also could be used to update the calories (unsure))
+// not finished yet
 const classifyingImage = async (request, h) => {
+    
+    const token = request.headers.authorization.replace('Bearer ', '');
+    const decodedToken = jwt.verify(token, 'secret_key');
+    const userId = decodedToken.userId;
+    
     try {
 
         const { file } = request.payload;
@@ -403,7 +444,13 @@ const classifyingImage = async (request, h) => {
 
         const result = mlResult.data;
 
-        // insert the process code here
+        /* insert the process code here
+
+        const currentDate = new Date().toISOString();
+
+        const query = 'INSERT INTO table_object(user_id, plan_id, food_id, date_captured, imageUrl) VALUES(?, ?, ?, ?, ?)'
+
+        end here */ 
         
         const response = h.response({
             status: 'success',
@@ -420,7 +467,7 @@ const classifyingImage = async (request, h) => {
         response.code(500);
         return response;
     }
-}
+};
 
 // plan c handler
 
@@ -476,6 +523,7 @@ module.exports = {
     readPlan,
     updatePlan,
     deletePlan,
-    addConsumedCalorie,
+    getHistory,
     classifyingImage,
+    addConsumedCalorie,
 };
